@@ -97,7 +97,7 @@ fun LoginScreen(navController: NavController?) {
 
             // LOGO
             Image(
-                painter = painterResource(id = R.drawable.logo00),
+                painter = painterResource(id = R.drawable.logo0),
                 contentDescription = "App Logo",
                 modifier = Modifier
                     .size(150.dp)
@@ -107,7 +107,7 @@ fun LoginScreen(navController: NavController?) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Text("Welcome back!", fontSize = 38.sp, fontWeight = FontWeight.Bold)
+            Text("Welcome back thanks!", fontSize = 38.sp, fontWeight = FontWeight.Bold)
             Text("Login to your Account", color = Color.Gray)
 
             Spacer(modifier = Modifier.height(12.dp))
