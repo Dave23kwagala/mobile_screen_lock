@@ -5,6 +5,8 @@
         <item name="colorPrimary">@color/md_blue_500</item>
         <item name="colorSecondary">@color/md_white_1000</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:fitsSystemWindows">true</item>
+
     </style>
 </resources>
 

@@ -3,33 +3,14 @@ package com.project.auto_aid.screens
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,6 +21,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
@@ -54,8 +36,9 @@ import com.project.auto_aid.R
 import com.project.auto_aid.authentcation.presentation.components.GoogleAuthHelper
 import com.project.auto_aid.authentcation.presentation.components.SocialMediaOptions
 import com.project.auto_aid.navigation.Routes
+import androidx.compose.foundation.layout.imePadding
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignupScreen(navController: NavController) {
 
@@ -64,6 +47,7 @@ fun SignupScreen(navController: NavController) {
 
     val auth = if (!isPreview) FirebaseAuth.getInstance() else null
     val db = if (!isPreview) FirebaseFirestore.getInstance() else null
+
     var firstName by remember { mutableStateOf("") }
     var otherName by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
@@ -72,6 +56,9 @@ fun SignupScreen(navController: NavController) {
     var showPassword by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
 
+    var selectedRole by remember { mutableStateOf("USER") }
+
+    // Google Sign-In launcher
     val googleLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -81,7 +68,7 @@ fun SignupScreen(navController: NavController) {
                 onSuccess = {
                     Toast.makeText(context, "Google login successful", Toast.LENGTH_SHORT).show()
                     navController.navigate(Routes.HomeScreen.route) {
-                        popUpTo(Routes.LoginScreen.route) { inclusive = true }
+                        popUpTo(Routes.SignupScreen.route) { inclusive = true }
                     }
                 },
                 onError = {
@@ -91,10 +78,6 @@ fun SignupScreen(navController: NavController) {
         }
     }
 
-
-    // ✅ ROLE STATE (NEW)
-    var selectedRole by remember { mutableStateOf("USER") }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -102,36 +85,39 @@ fun SignupScreen(navController: NavController) {
     ) {
 
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()) // ✅ RESPONSIVE
+                .imePadding()                          // ✅ KEYBOARD SAFE
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            // ===================== TOP IMAGE =====================
+            // Top image
             Image(
                 painter = painterResource(id = R.drawable.logo14),
-                contentDescription = "Background",
+                contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(80.dp),
-                contentScale = ContentScale.Crop
+                    .heightIn(max = 120.dp),
+                contentScale = ContentScale.Crop,
+                alpha = 0.13f
             )
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             Text(
                 text = "Sign Up As",
-                style = MaterialTheme.typography.headlineMedium,
+                fontSize = 28.sp,
                 fontWeight = FontWeight.Bold
             )
 
-            // ===================== ROLE SELECTION (ADDED ONLY) =====================
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
+            // ROLE SELECTION
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 96.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 RoleOption("User", selectedRole == "USER") {
                     selectedRole = "USER"
@@ -139,19 +125,16 @@ fun SignupScreen(navController: NavController) {
                 RoleOption("Provider", selectedRole == "SERVICE_PROVIDER") {
                     selectedRole = "SERVICE_PROVIDER"
                 }
-
             }
 
-            Spacer(modifier = Modifier.height(0.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // ===================== FORM CARD =====================
+            // FORM CARD
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
+                modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(6.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
 
@@ -159,71 +142,54 @@ fun SignupScreen(navController: NavController) {
                         value = firstName,
                         onValueChange = { firstName = it },
                         label = { Text("First Name") },
-                        singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    Spacer(modifier = Modifier.height(3.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     OutlinedTextField(
                         value = otherName,
                         onValueChange = { otherName = it },
                         label = { Text("Other Name") },
-                        singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    Spacer(modifier = Modifier.height(3.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                    // ✅ PHONE NUMBER (UGANDA)
                     OutlinedTextField(
                         value = phone,
                         onValueChange = { phone = it },
                         label = { Text("Phone Number") },
-                        singleLine = true,
-                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
-                            keyboardType = androidx.compose.ui.text.input.KeyboardType.Phone
-                        ),
-                        leadingIcon = {
-                            Text(
-                                text = "+256",
-                                fontWeight = FontWeight.Normal,
-                                color = Color.Gray
-                            )
-                        },
-                        placeholder = { Text("") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    Spacer(modifier = Modifier.height(3.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
                         label = { Text("Email") },
-                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    Spacer(modifier = Modifier.height(3.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
                         label = { Text("Password") },
-                        singleLine = true,
                         visualTransformation =
                             if (showPassword) VisualTransformation.None
                             else PasswordVisualTransformation(),
                         trailingIcon = {
                             IconButton(onClick = { showPassword = !showPassword }) {
                                 Image(
-                                    painter =
-                                        if (showPassword)
-                                            painterResource(id = R.drawable.no_see)
-                                        else
-                                            painterResource(id = R.drawable.see),
-                                    contentDescription = "Toggle password"
+                                    painter = painterResource(
+                                        id = if (showPassword) R.drawable.no_see else R.drawable.see
+                                    ),
+                                    contentDescription = null
                                 )
                             }
                         },
@@ -232,8 +198,9 @@ fun SignupScreen(navController: NavController) {
                 }
             }
 
+            Spacer(modifier = Modifier.height(20.dp))
 
-            // ===================== SIGN UP BUTTON =====================
+            // SIGN UP BUTTON
             Button(
                 onClick = {
                     if (
@@ -259,7 +226,7 @@ fun SignupScreen(navController: NavController) {
                                 "phone" to phone,
                                 "email" to email,
                                 "uid" to userId,
-                                "role" to selectedRole // ✅ SAVED
+                                "role" to selectedRole
                             )
 
                             db?.collection("users")?.document(userId)
@@ -288,8 +255,7 @@ fun SignupScreen(navController: NavController) {
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp)
-                    .padding(horizontal = 16.dp),
+                    .height(50.dp),
                 enabled = !isLoading,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF0A9AD9),
@@ -301,15 +267,15 @@ fun SignupScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // ===================== LOGIN TEXT =====================
+            // LOGIN LINK
             Text(
-                buildAnnotatedString {
+                text = buildAnnotatedString {
                     append("Already have an account? ")
                     withStyle(
                         SpanStyle(
                             color = Color(0xFF0A9AD9),
                             fontWeight = FontWeight.Bold,
-                            fontSize = 17.sp
+                            fontSize = 16.sp
                         )
                     ) { append("Login") }
                 },
@@ -318,14 +284,14 @@ fun SignupScreen(navController: NavController) {
                 }
             )
 
-            Spacer(modifier = Modifier.height(15.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // ===================== SOCIAL MEDIA (UNCHANGED) =====================
+            // SOCIAL LOGIN
             SocialMediaOptions(
                 onGoogleClick = {
-                    val intent = GoogleAuthHelper.getSignInIntent(context)
-                    val googleLauncher = null
-                    googleLauncher.launch()
+                    googleLauncher.launch(
+                        GoogleAuthHelper.getSignInIntent(context)
+                    )
                 },
                 onFacebookClick = {
                     Toast.makeText(context, "Facebook login coming soon", Toast.LENGTH_SHORT).show()
@@ -337,14 +303,11 @@ fun SignupScreen(navController: NavController) {
                     Toast.makeText(context, "Instagram login coming soon", Toast.LENGTH_SHORT).show()
                 }
             )
-
         }
     }
 }
 
-private fun Nothing?.launch() {}
-
-// ===================== ROLE OPTION CARD =====================
+// ROLE OPTION
 @Composable
 fun RoleOption(
     title: String,
@@ -353,20 +316,18 @@ fun RoleOption(
 ) {
     Column(
         modifier = Modifier
-            .width(100.dp)
+            .width(120.dp)
             .clickable { onClick() },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         Text(
             text = title,
             fontWeight = FontWeight.Bold,
             color = if (selected) Color(0xFF0A9AD9) else Color.Black
         )
 
-        Spacer(modifier = Modifier.height(3.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
-        // Bottom indicator line
         Box(
             modifier = Modifier
                 .height(3.dp)
@@ -379,8 +340,7 @@ fun RoleOption(
     }
 }
 
-
-@Preview(showBackground = true)
+@Preview(showBackground = true, device = "spec:width=360dp,height=640dp")
 @Composable
 fun SignupScreenPreview() {
     SignupScreen(navController = rememberNavController())

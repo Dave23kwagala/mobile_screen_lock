@@ -1,12 +1,17 @@
 package com.project.auto_aid.screens
 
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,13 +36,10 @@ import androidx.navigation.compose.rememberNavController
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.project.auto_aid.R
+import com.project.auto_aid.authentcation.presentation.components.GoogleAuthHelper
 import com.project.auto_aid.authentcation.presentation.components.SocialMediaOptions
 import com.project.auto_aid.navigation.Routes
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.clickable
-import com.project.auto_aid.authentcation.presentation.components.GoogleAuthHelper
-
+import androidx.compose.foundation.layout.imePadding
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,60 +70,72 @@ fun LoginScreen(navController: NavController?) {
         }
     }
 
-
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
     ) {
 
-        // Faint background image
+        // Background image
         Image(
             painter = painterResource(id = R.drawable.logo14),
-            contentDescription = "Background",
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(160.dp),
-            contentScale = ContentScale.Crop,
-            alpha = 1.18f   // Must be between 0f..1f
+                .heightIn(max = 160.dp),
+            alpha = 0.30f
         )
 
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .verticalScroll(rememberScrollState())
+                .imePadding()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            Spacer(modifier = Modifier.height(60.dp))
+            Spacer(modifier = Modifier.height(40.dp))
 
-            // LOGO
+            // App Logo
             Image(
-                painter = painterResource(id = R.drawable.logo0),
+                painter = painterResource(id = R.drawable.logo01),
                 contentDescription = "App Logo",
                 modifier = Modifier
-                    .size(150.dp)
-                    .clip(RoundedCornerShape(20.dp))
-                    .border(2.dp, Color.White, RoundedCornerShape(20.dp))
+                    .size(160.dp)
+                    .clip(RoundedCornerShape(100.dp))
+                    .border(
+                        width = 10.3.dp,
+                        color = Color(0xFF0A9AD9),
+                        shape = RoundedCornerShape(100.dp)
+                    )
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-            Text("Welcome back thanks!", fontSize = 38.sp, fontWeight = FontWeight.Bold)
-            Text("Login to your Account", color = Color.Gray)
+            Text(
+                text = "Welcome back!",
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold
+            )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = "Login to your Account",
+                color = Color.Gray
+            )
 
-            // ================= CARD WRAPPING INPUTS =================
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Input Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(Color(0xFFFFFFFF)),
-                elevation = CardDefaults.cardElevation(6.dp)
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
 
-                    // EMAIL
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
@@ -131,17 +145,16 @@ fun LoginScreen(navController: NavController?) {
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    Spacer(modifier = Modifier.height(1.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                    // PASSWORD
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
                         label = { Text("Password") },
                         singleLine = true,
-                        visualTransformation = if (showPassword)
-                            VisualTransformation.None
-                        else PasswordVisualTransformation(),
+                        visualTransformation =
+                            if (showPassword) VisualTransformation.None
+                            else PasswordVisualTransformation(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         trailingIcon = {
                             IconButton(onClick = { showPassword = !showPassword }) {
@@ -156,12 +169,11 @@ fun LoginScreen(navController: NavController?) {
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
                         text = "Forgot password?",
                         color = Color(0xFF0A9AD9),
-                        fontSize = 14.sp,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier
                             .align(Alignment.End)
@@ -169,15 +181,12 @@ fun LoginScreen(navController: NavController?) {
                                 navController?.navigate(Routes.ForgotPasswordScreen.route)
                             }
                     )
-
-
-
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-            // LOGIN BUTTON
+            // Login Button
             Button(
                 onClick = {
                     if (email.isNotEmpty() && password.isNotEmpty()) {
@@ -208,7 +217,7 @@ fun LoginScreen(navController: NavController?) {
                     contentColor = Color.White
                 )
             ) {
-                Text("Login", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Text("Login", fontSize = 18.sp, fontWeight = FontWeight.Bold)
             }
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -217,11 +226,11 @@ fun LoginScreen(navController: NavController?) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-
             SocialMediaOptions(
                 onGoogleClick = {
-                    val intent = GoogleAuthHelper.getSignInIntent(context)
-                    googleLauncher.launch(intent)
+                    googleLauncher.launch(
+                        GoogleAuthHelper.getSignInIntent(context)
+                    )
                 },
                 onFacebookClick = {
                     Toast.makeText(context, "Facebook login coming soon", Toast.LENGTH_SHORT).show()
@@ -234,25 +243,25 @@ fun LoginScreen(navController: NavController?) {
                 }
             )
 
+            Spacer(modifier = Modifier.height(12.dp))
 
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // SIGNUP REDIRECT
             TextButton(
                 onClick = {
                     navController?.navigate(Routes.SignupScreen.route)
                 }
             ) {
                 Text(
-                    buildAnnotatedString {
+                    text = buildAnnotatedString {
                         append("Don't have an Account? ")
                         withStyle(
-                            SpanStyle(
+                            style = SpanStyle(
                                 color = Color(0xFF0A9AD9),
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 17.sp
+                                fontSize = 16.sp
                             )
-                        ) { append("Sign Up") }
+                        ) {
+                            append("Sign Up")
+                        }
                     }
                 )
             }
@@ -260,8 +269,12 @@ fun LoginScreen(navController: NavController?) {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(
+    showBackground = true,
+    device = "spec:width=360dp,height=640dp"
+)
 @Composable
 fun LoginScreenPreview() {
     LoginScreen(navController = rememberNavController())
+
 }
