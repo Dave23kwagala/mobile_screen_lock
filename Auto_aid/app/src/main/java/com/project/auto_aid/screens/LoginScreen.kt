@@ -97,7 +97,7 @@ fun LoginScreen(navController: NavController?) {
 
             // LOGO
             Image(
-                painter = painterResource(id = R.drawable.logo0),
+                painter = painterResource(id = R.drawable.logo00),
                 contentDescription = "App Logo",
                 modifier = Modifier
                     .size(150.dp)
